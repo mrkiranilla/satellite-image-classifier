@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraSat - Satellite Image Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 12px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+        }
+
+        /* Custom File Upload Button */
+        .upload-area {
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .upload-area:hover {
+            background-color: #e9f5ff;
+        }
+        .upload-area input[type=file] {
+            display: none;
+        }
+        .upload-area {
+ 	    /* ... other styles are fine ... */
+   	    display: flex; /* Add this */
+   	    flex-direction: column; /* Add this */
+     	    justify-content: center; /* Add this */
+ 	    align-items: center; /* Add this */
+   	    min-height: 120px; /* Add this to give it a consistent size */
+	}
+
+	.upload-area .upload-text {
+    	    font-weight: 600;
+    	    color: var(--primary-color);
+	}
+
+	.upload-area .file-name {
+   	    /* ... existing styles are fine ... */
+   	    margin-top: 10px; /* Add or adjust this for spacing */
+ 	}
+        .file-name {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* Predict Button */
+        .predict-btn {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+        }
+        .predict-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: none;
+            border: 4px solid rgba(0,0,0,0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s ease infinite;
+            margin: 20px auto 0;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Results Card */
+        #result {
+            margin-top: 30px;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #result.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #result h3 { color: var(--primary-color); }
+        .confidence-list li {
+            list-style: none;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 20px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .progress {
+            background-color: var(--primary-color);
+            height: 100%;
+            width: 0%; /* Set by JS */
+            text-align: right;
+            padding-right: 5px;
+            color: white;
+            font-size: 0.8em;
+            line-height: 20px;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Cloud Based Satellite Image Processing Pipeline</h1>
+            <p>AI-Powered Satellite Image Analysis</p>
+
+            <form id="upload-form">
+                <label for="file-upload" class="upload-area">
+                    <span class="upload-text">Click to upload an image</span>
+                    <span class="file-name" id="file-name-display">No file selected</span>
+                    <input id="file-upload" name="file" type="file" accept="image/*" required>
+                </label>
+                <button type="submit" class="predict-btn" id="predict-btn" disabled>Analyze Image</button>
+            </form>
+
+            <div class="spinner" id="spinner"></div>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const fileInput = document.getElementById('file-upload');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const predictBtn = document.getElementById('predict-btn');
+        const resultDiv = document.getElementById('result');
+        const spinner = document.getElementById('spinner');
+        let uploadedFile = null;
+
+        // Enable button when a file is selected
+        fileInput.addEventListener('change', function(event) {
+            if (event.target.files.length > 0) {
+                uploadedFile = event.target.files[0];
+                fileNameDisplay.textContent = uploadedFile.name;
+                predictBtn.disabled = false;
+            } else {
+                uploadedFile = null;
+                fileNameDisplay.textContent = "No file selected";
+                predictBtn.disabled = true;
+            }
+        });
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            if (!uploadedFile) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', uploadedFile);
+
+            resultDiv.innerHTML = ''; // Clear previous results
+            resultDiv.classList.remove('visible');
+            spinner.style.display = 'block'; // Show spinner
+            predictBtn.disabled = true; // Disable button during prediction
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                spinner.style.display = 'none';
+                resultDiv.innerHTML = html;
+                // Add a small delay for the animation to be visible
+                setTimeout(() => {
+                    resultDiv.classList.add('visible');
+                    // Animate progress bars
+                    document.querySelectorAll('.progress').forEach(bar => {
+                        const width = bar.getAttribute('data-width');
+                        bar.style.width = width;
+                    });
+                }, 10);
+                predictBtn.disabled = false;
+            })
+            .catch(error => {
+                spinner.style.display = 'none';
+                resultDiv.innerHTML = `<p style="color:red;">An error occurred: ${error}. Please try again.</p>`;
+                resultDiv.classList.add('visible');
+                predictBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>

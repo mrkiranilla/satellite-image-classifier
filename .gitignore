@@ -1,0 +1,19 @@
+# Virtual Environment
+venv/
+nenv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# User uploads
+uploads/
+
+# Log files
+nohup.out
+*.log
+
+# IDE / OS specific
+.idea/
+.vscode/
+*.DS_Store
