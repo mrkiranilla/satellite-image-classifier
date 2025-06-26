@@ -51,7 +51,7 @@ To run this project locally, follow these steps:
     ```bash
     python app.py
     ```
-    The application will be available at `http://127.0.0.1:5000`.
+    The application will be available at `http://54.165.63.163:5000/`.
 
 ---
 
