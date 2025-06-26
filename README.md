@@ -2,7 +2,7 @@
 
 This project is an end-to-end cloud-based pipeline for classifying satellite imagery. It uses a Convolutional Neural Network (CNN) model built with PyTorch, served by a Flask web application, and deployed on an AWS EC2 instance.
 
-![Screenshot of the Application](./screenshot.png)
+![Screenshot of the Application](./Screenshot.png)
 *(To add a screenshot: take a picture of your running application, name it `screenshot.png`, and upload it to your repository. This line will then display it.)*
 
 ---
